@@ -1,12 +1,12 @@
 import {defineStore} from 'pinia'
-import router from '~/routes'
 
 export const useWorkspaceStore = defineStore('workspace', {
   state() {
     return {
       workspace: {}, //null도 가능
       workspaces: [],
-      currentWorkspacePath: []
+      currentWorkspacePath: [],
+      workspacesLoaded: false
     }
   },
   getters: {
@@ -16,7 +16,7 @@ export const useWorkspaceStore = defineStore('workspace', {
     //CRUD
     async createWorkspace(payload={}) {
       const {parentId} = payload
-      await request({
+      const workspace = await request({
         method: 'POST',
         body: {
           parentId,
@@ -24,6 +24,7 @@ export const useWorkspaceStore = defineStore('workspace', {
         }
       })
       this.readWorkspaces()
+      window.location.href = `/workspaces/${workspace.id}`
     },
     //워크스페이스 목록 조회
     async readWorkspaces() {
@@ -32,6 +33,11 @@ export const useWorkspaceStore = defineStore('workspace', {
       })
 
       this.workspaces = workspaces
+      this.workspacesLoaded = true
+
+      if(!this.workspaces.length) {
+        this.createWorkspace()
+      }
     },
     //상세정보 조회
     async readWorkspace(id) {
@@ -65,9 +71,8 @@ export const useWorkspaceStore = defineStore('workspace', {
       })
       this.readWorkspaces()
     },
-    findWorkspacePath() {
-      const currentWorkspaceId = router.currentRoute.value.params.id
-      function find(workspace, parents) {
+    findWorkspacePath(currentWorkspaceId) {
+      const find = (workspace, parents) => {
         if(currentWorkspaceId === workspace.id) {
           this.currentWorkspacePath = [...parents, workspace]
         }
