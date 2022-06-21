@@ -4,7 +4,16 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  alias: [
-    {find :'~', replacement: `${__dirname}/src`},
-  ]
+  resolve: {
+    alias: [
+      {find :'~', replacement: `${__dirname}/src`},
+    ]
+  },
+  css: {
+   preprocessorOptions: {
+     scss: {
+      additionalData: '@import "~/scss/variables";'
+    }
+  }
+}
 })
